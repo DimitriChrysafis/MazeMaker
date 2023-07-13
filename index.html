@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Random Maze Generator</title>
+    <style>
+        #canvas {
+            display: block;
+            margin: 0 auto;
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<pre id="mazeText"></pre>
+<script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const mazeText = document.getElementById("mazeText");
+
+    // Maze properties
+    const mazeSize = 100;
+    const gridSize = Math.min(window.innerWidth, window.innerHeight);
+    const tileSize = gridSize / mazeSize;
+    const mapWidth = mazeSize;
+    const mapHeight = mazeSize;
+    let map;
+
+    // Resize the canvas to fit the grid
+    canvas.width = gridSize;
+    canvas.height = gridSize;
+
+    function generateRandomMaze() {
+        const maze = [];
+
+        // Initialize the maze with walls
+        for (let row = 0; row < mapHeight; row++) {
+            maze[row] = [];
+            for (let col = 0; col < mapWidth; col++) {
+                maze[row][col] = "#";
+            }
+        }
+
+        // Randomized Prim's Algorithm
+        const walls = [];
+        const startX = 1;
+        const startY = 1;
+        maze[startY][startX] = ".";
+
+        walls.push({ x: startX, y: startY });
+
+        while (walls.length > 0) {
+            const randomIndex = Math.floor(Math.random() * walls.length);
+            const current = walls[randomIndex];
+            walls.splice(randomIndex, 1);
+
+            const neighbors = [
+                { x: current.x - 2, y: current.y },
+                { x: current.x + 2, y: current.y },
+                { x: current.x, y: current.y - 2 },
+                { x: current.x, y: current.y + 2 }
+            ];
+
+            for (const neighbor of neighbors) {
+                if (
+                    neighbor.x >= 0 &&
+                    neighbor.x < mapWidth &&
+                    neighbor.y >= 0 &&
+                    neighbor.y < mapHeight &&
+                    maze[neighbor.y][neighbor.x] === "#"
+                ) {
+                    maze[neighbor.y][neighbor.x] = ".";
+                    maze[current.y + (neighbor.y - current.y) / 2][current.x + (neighbor.x - current.x) / 2] = ".";
+                    walls.push(neighbor);
+                }
+            }
+        }
+
+        return maze;
+    }
+
+    function drawMap() {
+        for (let row = 0; row < mapHeight; row++) {
+            for (let col = 0; col < mapWidth; col++) {
+                const tile = map[row][col];
+                const x = col * tileSize;
+                const y = row * tileSize;
+
+                if (tile === "#") {
+                    ctx.fillStyle = "gray";
+                } else if (tile === ".") {
+                    ctx.fillStyle = "white";
+                }
+
+                ctx.fillRect(x, y, tileSize, tileSize);
+            }
+        }
+    }
+
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function update() {
+        clearCanvas();
+        drawMap();
+        mazeText.textContent = convertMazeToString();
+    }
+
+    function refreshMaze() {
+        map = generateRandomMaze();
+    }
+
+    function convertMazeToString() {
+        let mazeString = "";
+        for (let row = 0; row < mapHeight; row++) {
+            for (let col = 0; col < mapWidth; col++) {
+                const tile = map[row][col];
+                if (tile === "#") {
+                    mazeString += "#";
+                } else if (tile === ".") {
+                    mazeString += " ";
+                }
+            }
+            mazeString += "\n";
+        }
+        return mazeString;
+    }
+
+    function gameLoop() {
+        update();
+        setTimeout(function() {
+            refreshMaze();
+            gameLoop();
+        }, 2000);
+    }
+
+    // Initial setup
+    map = generateRandomMaze();
+    gameLoop();
+</script>
+</body>
+</html>
