@@ -1,5 +1,7 @@
 # Maze Maker Readme
 
+![Sample GIF](/sample.gif)
+
 This is a Randomized Prim's Algorithm example to make mazes. At the bottom '#' represents walls, and '.' represents open paths.
 
 ## Configuration
