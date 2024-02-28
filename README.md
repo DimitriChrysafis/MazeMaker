@@ -1,4 +1,4 @@
-# Maze Maker Readme
+# Maze Maker 
 
 ![Sample GIF](/sample.gif)
 
